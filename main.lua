@@ -19,6 +19,10 @@ local player = {
     animationInterval = 0.1 -- Time between frames
 }
 
+-- Backgrounds
+local backgrounds = {}
+local currentBackgroundIndex = 1
+
 -- Obstacles
 local obstacles = {}
 local obstacleTimer = 0
@@ -27,6 +31,11 @@ local obstacleInterval = 1.5
 -- Score
 local score = 0
 local distanceTraveled = 0
+
+-- Menu assets
+local menuImage
+local playButton = {x = 220, y = 320, width = 200, height = 50}
+local quitButton = {x = 220, y = 400, width = 200, height = 50}
 
 function love.load()
     love.window.setMode(screenWidth, screenHeight)
@@ -39,6 +48,16 @@ function love.load()
         love.graphics.newImage("Bubble3.png"),
         love.graphics.newImage("Bubble4.png")
     }
+
+    -- Load background images
+    backgrounds = {
+        love.graphics.newImage("day.png"),
+        love.graphics.newImage("afternoon.png"),
+        love.graphics.newImage("night.png")
+    }
+
+    -- Load menu image
+    menuImage = love.graphics.newImage("start.png")
 end
 
 function love.update(dt)
@@ -105,6 +124,11 @@ function love.update(dt)
             if obstacles[i].y > screenHeight then
                 table.remove(obstacles, i)
                 score = score + 1
+
+                -- Update background based on score
+                if score % 10 == 0 then
+                    currentBackgroundIndex = (currentBackgroundIndex % #backgrounds) + 1
+                end
             end
         end
 
@@ -112,8 +136,6 @@ function love.update(dt)
         distanceTraveled = distanceTraveled - player.velocityY * dt
     end
 end
-
-
 
 function love.draw()
     if gameState == "menu" then
@@ -124,6 +146,16 @@ function love.draw()
         drawPaused()
     elseif gameState == "gameover" then
         drawGameOver()
+    end
+end
+
+function love.mousepressed(x, y, button)
+    if gameState == "menu" and button == 1 then
+        if isMouseOver(playButton, x, y) then
+            restartGame()
+        elseif isMouseOver(quitButton, x, y) then
+            love.event.quit()
+        end
     end
 end
 
@@ -153,12 +185,34 @@ function checkCollision(player, obstacle)
 end
 
 function drawMenu()
-    love.graphics.printf("The Flight of The Bubble", 0, screenHeight / 3, screenWidth, "center")
-    love.graphics.printf("Press Enter to Play", 0, screenHeight / 2, screenWidth, "center")
-    love.graphics.printf("Press Escape to Quit", 0, screenHeight / 1.5, screenWidth, "center")
+    love.graphics.draw(menuImage, 0, 0)
 end
 
+function drawPaused()
+    love.graphics.setColor(0, 0, 0, 0.5) -- Fundo semi-transparente
+    love.graphics.rectangle("fill", 0, 0, screenWidth, screenHeight)
+    love.graphics.setColor(1, 1, 1, 1) -- Texto branco
+    love.graphics.printf("Paused", 0, screenHeight / 2 - 30, screenWidth, "center")
+    love.graphics.printf("Press Escape to Resume", 0, screenHeight / 2, screenWidth, "center")
+end
+
+function drawGameOver()
+    love.graphics.setColor(0, 0, 0, 0.5) -- Fundo semi-transparente
+    love.graphics.rectangle("fill", 0, 0, screenWidth, screenHeight)
+    love.graphics.setColor(1, 1, 1, 1) -- Texto branco
+
+    love.graphics.printf("Game Over", 0, screenHeight / 3, screenWidth, "center")
+    love.graphics.printf("Score: " .. score, 0, screenHeight / 2, screenWidth, "center")
+    love.graphics.printf("Press Enter to Restart", 0, screenHeight / 1.5, screenWidth, "center")
+    love.graphics.printf("Press Escape to Quit", 0, screenHeight / 1.3, screenWidth, "center")
+end
+
+
+
 function drawGame()
+    -- Draw current background
+    love.graphics.draw(backgrounds[currentBackgroundIndex], 0, 0, 0, screenWidth / backgrounds[currentBackgroundIndex]:getWidth(), screenHeight / backgrounds[currentBackgroundIndex]:getHeight())
+
     -- Draw player
     love.graphics.draw(player.animation[player.currentFrame], player.x - player.radius, player.y - player.radius, 0, 1, 1)
 
@@ -171,16 +225,9 @@ function drawGame()
     love.graphics.printf("Score: " .. score, 10, 10, screenWidth, "left")
 end
 
-function drawPaused()
-    love.graphics.printf("Paused", 0, screenHeight / 2, screenWidth, "center")
-    love.graphics.printf("Press Escape to Resume", 0, screenHeight / 1.5, screenWidth, "center")
-end
-
-function drawGameOver()
-    love.graphics.printf("Game Over", 0, screenHeight / 3, screenWidth, "center")
-    love.graphics.printf("Score: " .. score, 0, screenHeight / 2, screenWidth, "center")
-    love.graphics.printf("Press Enter to Play Again", 0, screenHeight / 1.5, screenWidth, "center")
-    love.graphics.printf("Press Escape to Quit", 0, screenHeight / 1.3, screenWidth, "center")
+function isMouseOver(button, mx, my)
+    return mx > button.x and mx < button.x + button.width and
+           my > button.y and my < button.y + button.height
 end
 
 function restartGame()
@@ -193,4 +240,5 @@ function restartGame()
     obstacles = {}
     score = 0
     distanceTraveled = 0
+    currentBackgroundIndex = 1
 end
