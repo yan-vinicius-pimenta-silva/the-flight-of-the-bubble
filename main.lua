@@ -1,7 +1,7 @@
 -- LOVE2D Game: The Flight of The Bubble
 
 -- Screen dimensions
-local screenWidth, screenHeight = 800, 600
+local screenWidth, screenHeight = 640, 640
 
 -- Game state
 local gameState = "menu" -- "menu", "playing", "paused", "gameover"
@@ -12,7 +12,11 @@ local player = {
     y = screenHeight - 50,
     radius = 20,
     speed = 200,
-    velocityY = -50 -- Initial upward movement
+    velocityY = -50, -- Initial upward movement
+    animation = {},
+    currentFrame = 1,
+    animationTimer = 0,
+    animationInterval = 0.1 -- Time between frames
 }
 
 -- Obstacles
@@ -27,6 +31,14 @@ local distanceTraveled = 0
 function love.load()
     love.window.setMode(screenWidth, screenHeight)
     love.window.setTitle("The Flight of The Bubble")
+
+    -- Load player animation frames
+    player.animation = {
+        love.graphics.newImage("Bubble1.png"),
+        love.graphics.newImage("Bubble2.png"),
+        love.graphics.newImage("Bubble3.png"),
+        love.graphics.newImage("Bubble4.png")
+    }
 end
 
 function love.update(dt)
@@ -60,6 +72,13 @@ function love.update(dt)
             player.y = player.radius
         elseif player.y + player.radius > screenHeight then
             player.y = screenHeight - player.radius
+        end
+
+        -- Update animation frame
+        player.animationTimer = player.animationTimer + dt
+        if player.animationTimer >= player.animationInterval then
+            player.animationTimer = 0
+            player.currentFrame = player.currentFrame % #player.animation + 1
         end
 
         -- Generate obstacles
@@ -141,7 +160,7 @@ end
 
 function drawGame()
     -- Draw player
-    love.graphics.circle("fill", player.x, player.y, player.radius)
+    love.graphics.draw(player.animation[player.currentFrame], player.x - player.radius, player.y - player.radius, 0, 1, 1)
 
     -- Draw obstacles
     for _, obstacle in ipairs(obstacles) do
@@ -169,6 +188,8 @@ function restartGame()
     player.x = screenWidth / 2
     player.y = screenHeight - 50
     player.velocityY = -50
+    player.currentFrame = 1
+    player.animationTimer = 0
     obstacles = {}
     score = 0
     distanceTraveled = 0
