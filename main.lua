@@ -1,4 +1,4 @@
--- LOVE2D Game: The Flight of The Bubble
+-- LOVE2D Game: Go Bubble!
 
 -- Screen dimensions
 local screenWidth, screenHeight = 640, 640
@@ -42,9 +42,13 @@ local gameOverImage
 local restartButton = {x = 220, y = 300, width = 200, height = 50}
 local exitButton = {x = 220, y = 400, width = 200, height = 50}
 
+-- Gameplay music
+local gameplayMusic
+
 function love.load()
     love.window.setMode(screenWidth, screenHeight)
     love.window.setTitle("The Flight of The Bubble")
+    
 
     -- Load player animation frames
     player.animation = {
@@ -67,10 +71,21 @@ function love.load()
     -- Load game over image
     gameOverImage = love.graphics.newImage("gameover.png")
 
+    -- Load gameplay music
+    gameplayMusic = love.audio.newSource("song1.mp3", "stream")
+    gameplayMusic:setVolume(0.5) -- Ajusta o volume para 50%
+    gameplayMusic:setLooping(true) -- Set the music to loop
+    
+
 end
 
 function love.update(dt)
     if gameState == "playing" then
+        -- Play the gameplay music if it's not already playing
+        if not gameplayMusic:isPlaying() then
+            gameplayMusic:play()
+        end
+
         -- Update player position based on input
         if love.keyboard.isDown("w") or love.keyboard.isDown("up") then
             player.y = player.y - player.speed * dt
@@ -143,6 +158,11 @@ function love.update(dt)
 
         -- Update distance traveled
         distanceTraveled = distanceTraveled - player.velocityY * dt
+    else
+        -- Stop the gameplay music if the game is not in the playing state
+        if gameplayMusic:isPlaying() then
+            gameplayMusic:stop()
+        end
     end
 end
 
@@ -175,9 +195,6 @@ function love.mousepressed(x, y, button)
         end
     end
 end
-
-
-
 
 function love.keypressed(key)
     if key == "escape" then
@@ -217,10 +234,8 @@ function drawPaused()
 end
 
 function drawGameOver()
-    love.graphics.draw(gameOverImage,0, 0)
+    love.graphics.draw(gameOverImage, 0, 0)
 end
-
-
 
 function drawGame()
     -- Draw current background
