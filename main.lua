@@ -34,7 +34,7 @@ local distanceTraveled = 0
 
 -- Menu assets
 local menuImage
-local playButton = {x = 220, y = 320, width = 200, height = 50}
+local playButton = {x = 220, y = 300, width = 200, height = 50}
 local quitButton = {x = 220, y = 400, width = 200, height = 50}
 
 function love.load()
