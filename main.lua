@@ -37,6 +37,11 @@ local menuImage
 local playButton = {x = 220, y = 300, width = 200, height = 50}
 local quitButton = {x = 220, y = 400, width = 200, height = 50}
 
+-- Game Over assets
+local gameOverImage
+local restartButton = {x = 220, y = 300, width = 200, height = 50}
+local exitButton = {x = 220, y = 400, width = 200, height = 50}
+
 function love.load()
     love.window.setMode(screenWidth, screenHeight)
     love.window.setTitle("The Flight of The Bubble")
@@ -58,6 +63,10 @@ function love.load()
 
     -- Load menu image
     menuImage = love.graphics.newImage("start.png")
+
+    -- Load game over image
+    gameOverImage = love.graphics.newImage("gameover.png")
+
 end
 
 function love.update(dt)
@@ -150,14 +159,25 @@ function love.draw()
 end
 
 function love.mousepressed(x, y, button)
-    if gameState == "menu" and button == 1 then
-        if isMouseOver(playButton, x, y) then
-            restartGame()
-        elseif isMouseOver(quitButton, x, y) then
-            love.event.quit()
+    if button == 1 then
+        if gameState == "menu" then
+            if isMouseOver(playButton, x, y) then
+                restartGame()
+            elseif isMouseOver(quitButton, x, y) then
+                love.event.quit()
+            end
+        elseif gameState == "gameover" then
+            if isMouseOver(restartButton, x, y) then
+                restartGame()
+            elseif isMouseOver(exitButton, x, y) then
+                love.event.quit()
+            end
         end
     end
 end
+
+
+
 
 function love.keypressed(key)
     if key == "escape" then
@@ -197,14 +217,7 @@ function drawPaused()
 end
 
 function drawGameOver()
-    love.graphics.setColor(0, 0, 0, 0.5) -- Fundo semi-transparente
-    love.graphics.rectangle("fill", 0, 0, screenWidth, screenHeight)
-    love.graphics.setColor(1, 1, 1, 1) -- Texto branco
-
-    love.graphics.printf("Game Over", 0, screenHeight / 3, screenWidth, "center")
-    love.graphics.printf("Score: " .. score, 0, screenHeight / 2, screenWidth, "center")
-    love.graphics.printf("Press Enter to Restart", 0, screenHeight / 1.5, screenWidth, "center")
-    love.graphics.printf("Press Escape to Quit", 0, screenHeight / 1.3, screenWidth, "center")
+    love.graphics.draw(gameOverImage,0, 0)
 end
 
 
