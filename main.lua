@@ -26,7 +26,7 @@ local currentBackgroundIndex = 1
 -- Obstacles
 local obstacles = {}
 local obstacleTimer = 0
-local obstacleInterval = 1.5
+local obstacleInterval = 0.5
 
 -- Score
 local score = 0
@@ -45,10 +45,14 @@ local exitButton = {x = 220, y = 400, width = 200, height = 50}
 -- Gameplay music
 local gameplayMusic
 
+-- Customized cursor
+local customCursor
+
+
+
 function love.load()
     love.window.setMode(screenWidth, screenHeight)
     love.window.setTitle("The Flight of The Bubble")
-    
 
     -- Load player animation frames
     player.animation = {
@@ -71,12 +75,19 @@ function love.load()
     -- Load game over image
     gameOverImage = love.graphics.newImage("gameover.png")
 
+    -- Load obstacle sprites
+    obstacleSprites = {
+        love.graphics.newImage("cometa1.png"),
+        love.graphics.newImage("rocket.png"),
+        love.graphics.newImage("plane1.png")
+    }
+
+    
+
     -- Load gameplay music
     gameplayMusic = love.audio.newSource("song1.mp3", "stream")
     gameplayMusic:setVolume(0.5) -- Ajusta o volume para 50%
     gameplayMusic:setLooping(true) -- Set the music to loop
-    
-
 end
 
 function love.update(dt)
@@ -129,10 +140,11 @@ function love.update(dt)
         if obstacleTimer >= obstacleInterval then
             obstacleTimer = 0
             table.insert(obstacles, {
+                sprite = obstacleSprites[math.random(#obstacleSprites)],
                 x = math.random(0, screenWidth - 50),
-                y = player.y - screenHeight,
-                width = math.random(50, 150),
-                height = 20
+                y = -50,
+                width = 50, -- You can adjust based on sprite size
+                height = 50 -- You can adjust based on sprite size
             })
         end
 
@@ -150,7 +162,7 @@ function love.update(dt)
                 score = score + 1
 
                 -- Update background based on score
-                if score % 10 == 0 then
+                if score % 50 == 0 then
                     currentBackgroundIndex = (currentBackgroundIndex % #backgrounds) + 1
                 end
             end
@@ -246,12 +258,13 @@ function drawGame()
 
     -- Draw obstacles
     for _, obstacle in ipairs(obstacles) do
-        love.graphics.rectangle("fill", obstacle.x, obstacle.y, obstacle.width, obstacle.height)
+        love.graphics.draw(obstacle.sprite, obstacle.x, obstacle.y, 0, obstacle.width / obstacle.sprite:getWidth(), obstacle.height / obstacle.sprite:getHeight())
     end
 
     -- Draw score
     love.graphics.printf("Score: " .. score, 10, 10, screenWidth, "left")
 end
+
 
 function isMouseOver(button, mx, my)
     return mx > button.x and mx < button.x + button.width and
