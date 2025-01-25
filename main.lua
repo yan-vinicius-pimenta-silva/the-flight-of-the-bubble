@@ -212,8 +212,10 @@ function love.keypressed(key)
     if key == "escape" then
         if gameState == "playing" then
             gameState = "paused"
+            gameplayMusic:pause() -- Pausa a música ao pausar o jogo
         elseif gameState == "paused" then
             gameState = "playing"
+            gameplayMusic:play() -- Retoma a música ao despausar o jogo
         elseif gameState == "menu" then
             love.event.quit()
         elseif gameState == "gameover" then
@@ -225,6 +227,7 @@ function love.keypressed(key)
         end
     end
 end
+
 
 function checkCollision(player, obstacle)
     return player.x + player.radius > obstacle.x and
