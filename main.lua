@@ -52,7 +52,7 @@ local customCursor
 
 function love.load()
     love.window.setMode(screenWidth, screenHeight)
-    love.window.setTitle("The Flight of The Bubble")
+    love.window.setTitle("Go Bubble")
 
     -- Load player animation frames
     player.animation = {
